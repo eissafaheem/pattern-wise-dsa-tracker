@@ -1,0 +1,945 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>DSA Pattern Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#F1F5F3; --surface:#FFFFFF; --surface-2:#E7EEEB; --ink:#11201B; --ink-2:#44564F; --ink-3:#7A8C86; --line:#DAE3DF;
+  --accent:#0C7866; --accent-2:#095E50; --accent-soft:#D3EDE6; --on-accent:#FFFFFF;
+  --doing:#A4670F; --doing-soft:#FAEDD3; --revise:#AE386A; --revise-soft:#F7DDE8;
+  --feature:#0E3B33; --feature-ink:#E4F3EE; --feature-dim:#9DC3B8; --feature-accent:#7FE3CA; --feature-line:rgba(228,243,238,.18);
+  --shadow:0 1px 2px rgba(17,32,27,.05),0 12px 28px -16px rgba(17,32,27,.22);
+  --r:16px;
+  --f-display:"Bricolage Grotesque","IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0A100E; --surface:#111916; --surface-2:#19231F; --ink:#E1EBE7; --ink-2:#A3B4AE; --ink-3:#6A7D77; --line:#212E2A;
+    --accent:#3BC2A6; --accent-2:#6AD8C0; --accent-soft:#113630; --on-accent:#03201A;
+    --doing:#E6AE48; --doing-soft:#35280F; --revise:#EB7BA9; --revise-soft:#381726;
+    --feature:#0F2C26; --feature-ink:#DDF1EA; --feature-dim:#89AFA4; --feature-accent:#6FE0C4; --feature-line:rgba(221,241,234,.14);
+    --shadow:0 1px 2px rgba(0,0,0,.35),0 14px 32px -18px rgba(0,0,0,.7);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0A100E; --surface:#111916; --surface-2:#19231F; --ink:#E1EBE7; --ink-2:#A3B4AE; --ink-3:#6A7D77; --line:#212E2A;
+  --accent:#3BC2A6; --accent-2:#6AD8C0; --accent-soft:#113630; --on-accent:#03201A;
+  --doing:#E6AE48; --doing-soft:#35280F; --revise:#EB7BA9; --revise-soft:#381726;
+  --feature:#0F2C26; --feature-ink:#DDF1EA; --feature-dim:#89AFA4; --feature-accent:#6FE0C4; --feature-line:rgba(221,241,234,.14);
+  --shadow:0 1px 2px rgba(0,0,0,.35),0 14px 32px -18px rgba(0,0,0,.7);
+  color-scheme:dark;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 var(--f-body);transition:background .3s,color .3s}
+a{color:inherit}
+button,select,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.wrap{max-width:1120px;margin:0 auto;padding-inline:clamp(16px,4vw,32px);padding-block:24px 72px;display:flex;flex-direction:column;gap:28px}
+.eyebrow{font:500 11.5px/1.2 var(--f-mono);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+h1,h2,h3{margin:0;text-wrap:balance}
+h2{font:700 1.3rem/1.2 var(--f-display);letter-spacing:-.01em}
+
+/* ---------- Header ---------- */
+.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px}
+.brand{display:flex;flex-direction:column;gap:8px;min-width:0}
+.brand h1{font:800 clamp(2.1rem,5vw,3.3rem)/1 var(--f-display);letter-spacing:-.03em}
+.brand h1 span{color:var(--accent)}
+.brand p{margin:0;color:var(--ink-2);max-width:62ch}
+.src{color:var(--accent-2);text-decoration:none;font-weight:500;border-bottom:1px solid color-mix(in srgb,var(--accent) 40%,transparent)}
+.src:hover{border-bottom-color:var(--accent)}
+.actions{display:flex;gap:8px;align-items:center}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 13px;font-size:13.5px;font-weight:500;transition:transform .15s,background .2s,border-color .2s}
+.btn:hover{border-color:var(--ink-3)}
+.btn:active{transform:scale(.97)}
+.btn svg{width:16px;height:16px;flex:none}
+.icon-btn{padding:8px}
+.menu{position:relative}
+.menu summary{list-style:none}
+.menu summary::-webkit-details-marker{display:none}
+.menu-pop{position:absolute;right:0;top:calc(100% + 6px);z-index:40;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:6px;display:flex;flex-direction:column;min-width:220px;animation:drop .18s ease-out}
+.menu-pop button{border:0;background:none;text-align:left;padding:9px 11px;border-radius:8px;font-size:13.5px}
+.menu-pop button:hover{background:var(--surface-2)}
+.menu-pop .danger{color:var(--revise)}
+.menu-pop small{display:block;color:var(--ink-3);font-size:12px;padding:6px 11px 4px;border-top:1px solid var(--line);margin-top:4px}
+@keyframes drop{from{opacity:0;transform:translateY(-4px)}}
+
+/* ---------- Hero ---------- */
+.hero{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:22px}
+.ov{display:flex;flex-direction:column;gap:22px}
+.ov-top{display:flex;align-items:center;gap:26px;flex-wrap:wrap}
+.ring{position:relative;width:136px;height:136px;flex:none}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-width:11}
+.ring .trk{stroke:var(--surface-2)}
+.ring .val{stroke:var(--accent);stroke-linecap:round;transition:stroke-dashoffset 1.2s cubic-bezier(.2,.8,.2,1)}
+.ring-label{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring-label b{font:700 2rem/1 var(--f-display);letter-spacing:-.02em}
+.ring-label b small{font-size:.55em;margin-left:1px}
+.ring-label>span{font-size:12px;color:var(--ink-3);margin-top:4px}
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 28px;flex:1;min-width:220px}
+.stat{display:flex;flex-direction:column;gap:2px;padding-left:12px;border-left:3px solid var(--c,var(--line))}
+.stat b{font:600 1.5rem/1.1 var(--f-mono);font-variant-numeric:tabular-nums}
+.stat span{font-size:12.5px;color:var(--ink-2)}
+.ov-bottom{display:flex;flex-wrap:wrap;gap:18px 28px;align-items:flex-end;justify-content:space-between;border-top:1px solid var(--line);padding-top:18px}
+.streak{display:flex;gap:26px}
+.streak div{display:flex;flex-direction:column;gap:2px}
+.streak b{font:700 1.6rem/1 var(--f-display)}
+.streak span{font-size:12.5px;color:var(--ink-2)}
+.heat-wrap{display:flex;flex-direction:column;gap:6px;overflow-x:auto;max-width:100%}
+.heat{display:flex;gap:3px}
+.hw{display:grid;grid-template-rows:repeat(7,10px);gap:3px}
+.hw i{width:10px;height:10px;border-radius:2.5px;background:var(--surface-2)}
+.hw .l1{background:color-mix(in srgb,var(--accent) 35%,var(--surface-2))}
+.hw .l2{background:color-mix(in srgb,var(--accent) 60%,var(--surface-2))}
+.hw .l3{background:color-mix(in srgb,var(--accent) 82%,var(--surface-2))}
+.hw .l4{background:var(--accent)}
+.hw .today{outline:1.5px solid var(--ink-3);outline-offset:1px}
+.hw .future{visibility:hidden}
+
+/* Up next (feature card) */
+.next{background:var(--feature);color:var(--feature-ink);border:0;position:relative;overflow:hidden;display:flex;flex-direction:column;gap:14px}
+.next .eyebrow{color:var(--feature-dim)}
+.next-idx{position:absolute;right:14px;top:6px;font:600 5.5rem/1 var(--f-mono);color:var(--feature-ink);opacity:.07;pointer-events:none;letter-spacing:-.04em}
+.next-body{display:flex;flex-direction:column;gap:12px;flex:1;position:relative}
+.next-body.enter>*{animation:slideIn .5s cubic-bezier(.2,.8,.2,1) both}
+.next-body.enter>*:nth-child(2){animation-delay:.05s}
+.next-body.enter>*:nth-child(3){animation-delay:.1s}
+.next-body.enter>*:nth-child(4){animation-delay:.15s}
+.next-body.enter>*:nth-child(5){animation-delay:.2s}
+@keyframes slideIn{from{opacity:0;transform:translateY(12px)}}
+.next-sec{margin:0;font-size:13px;color:var(--feature-dim)}
+.next-sec b{color:var(--feature-accent);font-weight:600}
+.next-q{font:700 clamp(1.35rem,2.6vw,1.7rem)/1.2 var(--f-display);letter-spacing:-.01em}
+.next-pos{margin:0;font-size:12.5px;color:var(--feature-dim)}
+.next .links{display:flex;flex-wrap:wrap;gap:6px}
+.next .lk{border-color:var(--feature-line);background:transparent;color:var(--feature-ink)}
+.next .lk:hover{border-color:var(--feature-accent);color:var(--feature-accent)}
+.next .tag{background:rgba(255,255,255,.08);color:var(--feature-ink)}
+.next-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:auto;padding-top:6px}
+.next .btn{background:transparent;border-color:var(--feature-line);color:var(--feature-ink)}
+.next .btn:hover{border-color:var(--feature-dim)}
+.next .btn.primary{background:var(--feature-accent);border-color:var(--feature-accent);color:#062A22;font-weight:600}
+.next .btn.primary:hover{filter:brightness(1.06)}
+.next-done h3{font:700 1.6rem/1.2 var(--f-display)}
+.next-done p{margin:6px 0 0;color:var(--feature-dim)}
+
+/* ---------- Array strip ---------- */
+.strip-card{display:flex;flex-direction:column;gap:14px}
+.strip-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:8px 16px}
+.strip-head p{margin:0;color:var(--ink-2);font-size:13.5px}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12.5px;color:var(--ink-2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:11px;height:11px;border-radius:3px;background:var(--c)}
+.strip{display:flex;flex-wrap:wrap;gap:8px 12px}
+.sg{display:flex;flex-wrap:wrap;gap:3px;padding-right:12px;border-right:1px dashed var(--line)}
+.sg:last-child{border-right:0}
+.cell{width:14px;height:14px;padding:0;border:0;border-radius:3.5px;background:var(--surface-2);box-shadow:inset 0 0 0 1px var(--line);transition:transform .15s,background .35s,box-shadow .35s;animation:cellIn .45s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i) * 3ms)}
+.cell:hover{transform:scale(1.4);position:relative;z-index:1}
+.cell[data-s="done"]{background:var(--accent);box-shadow:none}
+.cell[data-s="doing"]{background:var(--doing);box-shadow:none}
+.cell[data-s="revise"]{background:var(--revise);box-shadow:none}
+.cell.next-up{box-shadow:0 0 0 2px var(--bg),0 0 0 3.5px var(--accent);animation:cellIn .45s both,beacon 1.8s ease-in-out infinite}
+.cell.ping{animation:ping .6s ease-out}
+@keyframes cellIn{from{transform:scale(.3);opacity:.2}}
+@keyframes beacon{50%{box-shadow:0 0 0 2px var(--bg),0 0 0 5px color-mix(in srgb,var(--accent) 45%,transparent)}}
+@keyframes ping{40%{transform:scale(1.7)}}
+
+/* ---------- Pattern tiles ---------- */
+.patterns{display:flex;flex-direction:column;gap:14px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.tile{display:flex;flex-direction:column;gap:10px;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;transition:transform .2s,border-color .2s,box-shadow .2s}
+.tile:hover{transform:translateY(-2px);border-color:var(--ink-3);box-shadow:var(--shadow)}
+.tile-t{font-weight:600;font-size:13.5px;line-height:1.3}
+.tile-m{display:flex;align-items:center;gap:10px;margin-top:auto}
+.bar{flex:1;height:5px;border-radius:99px;background:var(--surface-2);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--accent);border-radius:inherit;transition:width 1s cubic-bezier(.2,.8,.2,1)}
+.tile-c{font-size:12px;color:var(--ink-2)}
+.tile.complete{border-color:color-mix(in srgb,var(--accent) 55%,var(--line));background:color-mix(in srgb,var(--accent-soft) 45%,var(--surface))}
+.tile.complete .tile-c{color:var(--accent-2);font-weight:600}
+
+/* ---------- Toolbar ---------- */
+.toolbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding-block:12px;margin-block:-12px;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.search{flex:1 1 240px;display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:0 12px;transition:border-color .2s}
+.search:focus-within{border-color:var(--accent)}
+.search svg{width:16px;height:16px;color:var(--ink-3);flex:none}
+.search input{flex:1;min-width:0;border:0;background:none;outline:none;padding:9px 0;font-size:14px}
+.search kbd{font:500 11px var(--f-mono);color:var(--ink-3);border:1px solid var(--line);border-radius:5px;padding:1px 6px}
+.seg{display:flex;gap:2px;background:var(--surface-2);border-radius:10px;padding:3px;overflow-x:auto;max-width:100%}
+.seg button{border:0;background:none;border-radius:8px;padding:6px 11px;font-size:13px;font-weight:500;color:var(--ink-2);white-space:nowrap;display:flex;gap:6px;align-items:center;transition:background .2s,color .2s}
+.seg button .mono{font-size:11.5px;color:var(--ink-3)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.seg button[aria-pressed="true"] .mono{color:var(--accent-2)}
+
+/* ---------- Sections ---------- */
+.list{display:flex;flex-direction:column;gap:12px}
+.sec{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;scroll-margin-top:84px;animation:rise .55s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--d) * 35ms)}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}}
+.sec-head{width:100%;display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;align-items:center;gap:14px;border:0;background:none;text-align:left;padding:14px 16px;position:relative}
+.sec-head:hover{background:color-mix(in srgb,var(--surface-2) 45%,var(--surface))}
+.sec-ring{width:36px;height:36px;position:relative}
+.sec-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.sec-ring circle{fill:none;stroke-width:4}
+.sec-ring .trk{stroke:var(--surface-2)}
+.sec-ring .val{stroke:var(--accent);stroke-linecap:round;transition:stroke-dashoffset 1s cubic-bezier(.2,.8,.2,1)}
+.sec-ring svg.tick{position:absolute;inset:0;transform:none;opacity:0;transition:opacity .3s}
+.sec.complete .sec-ring svg.tick{opacity:1}
+.sec-ring .tick path{fill:none;stroke:var(--accent);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.sec-title{font:700 1.1rem/1.25 var(--f-display);letter-spacing:-.005em}
+.sec-count{font-size:13px;color:var(--ink-2);white-space:nowrap}
+.sec-count b{color:var(--ink);font-weight:600}
+.chev{width:20px;height:20px;color:var(--ink-3);transition:transform .3s}
+.sec.collapsed .chev{transform:rotate(-90deg)}
+.sec-bar{position:absolute;left:0;right:0;bottom:0;height:2px}
+.sec-bar i{display:block;height:100%;width:0;background:var(--accent);transition:width 1s cubic-bezier(.2,.8,.2,1)}
+.sec-body{display:grid;grid-template-rows:1fr;transition:grid-template-rows .35s ease}
+.sec.collapsed .sec-body{grid-template-rows:0fr}
+.list.filtering .sec .sec-body{grid-template-rows:1fr}
+.list.filtering .sec .chev{visibility:hidden}
+.sec-inner{overflow:hidden;min-height:0}
+.list.filtering .sub{display:none}
+
+.sub{display:flex;align-items:center;gap:10px;padding:12px 16px 4px 64px;border-top:1px solid var(--line);font:600 11px/1 var(--f-mono);letter-spacing:.09em;text-transform:uppercase;color:var(--accent-2)}
+.sub::after{content:"";flex:1;height:1px;background:var(--line)}
+.sub+.row{border-top:0}
+
+.row{display:grid;grid-template-columns:auto 2.6rem minmax(0,1fr) auto auto;grid-template-areas:"check num q meta note" "notep notep notep notep notep";column-gap:12px;align-items:center;padding:9px 14px 9px 16px;border-top:1px solid var(--line);transition:background .35s}
+.row:hover{background:color-mix(in srgb,var(--surface-2) 40%,var(--surface))}
+.row.flash{animation:flash 1.6s ease-out}
+@keyframes flash{0%,30%{background:var(--accent-soft)}}
+.check{grid-area:check;width:26px;height:26px;border-radius:8px;border:1.5px solid var(--ink-3);background:var(--surface);display:grid;place-items:center;padding:0;transition:background .25s,border-color .25s,transform .15s}
+.check:hover{border-color:var(--accent)}
+.check:active{transform:scale(.88)}
+.check svg{width:16px;height:16px}
+.check path{fill:none;stroke:var(--on-accent);stroke-width:3;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:24;stroke-dashoffset:24;transition:stroke-dashoffset .35s cubic-bezier(.6,0,.3,1) .05s}
+.row[data-s="done"] .check{background:var(--accent);border-color:var(--accent)}
+.row[data-s="revise"] .check{background:var(--revise);border-color:var(--revise)}
+.row[data-s="done"] .check path,.row[data-s="revise"] .check path{stroke-dashoffset:0}
+.row[data-s="doing"] .check{border-color:var(--doing);background:linear-gradient(90deg,var(--doing-soft) 50%,var(--surface) 50%)}
+.row.pop .check{animation:pop .45s cubic-bezier(.3,1.6,.5,1)}
+@keyframes pop{40%{transform:scale(1.25)}}
+.num{grid-area:num;font:500 12px var(--f-mono);color:var(--ink-3);font-variant-numeric:tabular-nums}
+.qcol{grid-area:q;min-width:0;display:flex;flex-direction:column;gap:1px}
+.q{display:inline;font-size:14.5px;line-height:1.4;overflow-wrap:anywhere;background:linear-gradient(currentColor,currentColor) no-repeat 0 58%/0 1.5px;transition:background-size .45s cubic-bezier(.6,0,.3,1),color .3s;-webkit-box-decoration-break:clone;box-decoration-break:clone;width:fit-content;max-width:100%}
+.q.derived{color:var(--ink-2);font-family:var(--f-mono);font-size:13px}
+.row[data-s="done"] .q{color:var(--ink-3);background-size:100% 1.5px}
+.when{font-size:11.5px;color:var(--ink-3);font-family:var(--f-mono)}
+.when:empty{display:none}
+.meta{grid-area:meta;display:flex;align-items:center;gap:10px;justify-content:flex-end}
+.links{display:flex;flex-wrap:wrap;gap:5px}
+.lk{display:inline-flex;align-items:center;gap:4px;font-size:12.5px;font-weight:500;text-decoration:none;color:var(--ink-2);border:1px solid var(--line);border-radius:7px;padding:3px 8px;background:var(--surface);transition:border-color .2s,color .2s,transform .15s;white-space:nowrap}
+.lk svg{width:11px;height:11px;transition:transform .2s}
+.lk:hover{border-color:var(--accent);color:var(--accent-2)}
+.lk:hover svg{transform:translate(1px,-1px)}
+.tag{font:600 11px/1 var(--f-mono);letter-spacing:.05em;text-transform:uppercase;background:var(--doing-soft);color:var(--doing);border-radius:6px;padding:5px 7px}
+.sel{position:relative;display:inline-flex}
+.sel::after{content:"";position:absolute;right:11px;top:50%;width:6px;height:6px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:translateY(-70%) rotate(45deg);pointer-events:none;opacity:.7}
+.status{appearance:none;-webkit-appearance:none;border:0;border-radius:99px;padding:5px 28px 5px 12px;font-size:12.5px;font-weight:600;background:var(--surface-2);color:var(--ink-2);width:118px;transition:background .3s,color .3s}
+.row[data-s="doing"] .sel{color:var(--doing)} .row[data-s="doing"] .status{background:var(--doing-soft);color:var(--doing)}
+.row[data-s="done"] .sel{color:var(--accent-2)} .row[data-s="done"] .status{background:var(--accent-soft);color:var(--accent-2)}
+.row[data-s="revise"] .sel{color:var(--revise)} .row[data-s="revise"] .status{background:var(--revise-soft);color:var(--revise)}
+.sel{color:var(--ink-2)}
+.note-btn{grid-area:note;width:32px;height:32px;border-radius:8px;border:1px solid transparent;background:none;color:var(--ink-3);display:grid;place-items:center;position:relative;transition:background .2s,color .2s}
+.note-btn:hover,.note-btn[aria-expanded="true"]{background:var(--surface-2);color:var(--ink)}
+.note-btn svg{width:16px;height:16px}
+.note-btn.has::after{content:"";position:absolute;top:5px;right:5px;width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 2px var(--surface)}
+.note{grid-area:notep;padding:8px 0 4px 82px;animation:drop .2s ease-out}
+.note textarea{width:100%;resize:vertical;min-height:64px;border:1px solid var(--line);border-radius:10px;background:var(--bg);padding:9px 11px;font-size:13.5px;line-height:1.5;outline:none;transition:border-color .2s}
+.note textarea:focus{border-color:var(--accent)}
+.empty{text-align:center;color:var(--ink-2);padding:40px 16px;border:1px dashed var(--line);border-radius:var(--r)}
+.empty b{display:block;font:700 1.15rem var(--f-display);color:var(--ink);margin-bottom:4px}
+
+footer{display:flex;flex-wrap:wrap;gap:10px 24px;justify-content:space-between;color:var(--ink-3);font-size:12.5px;border-top:1px solid var(--line);padding-top:18px}
+footer kbd{font:500 11px var(--f-mono);border:1px solid var(--line);border-radius:5px;padding:1px 5px;color:var(--ink-2)}
+
+.toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom,0px));transform:translate(-50%,160%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:13.5px;font-weight:500;box-shadow:var(--shadow);z-index:60;opacity:0;visibility:hidden;transition:transform .45s cubic-bezier(.2,.9,.3,1.2),opacity .3s,visibility 0s .45s;max-width:calc(100% - 32px);display:flex;gap:10px;align-items:center}
+.toast.show{transform:translate(-50%,0);opacity:1;visibility:visible;transition:transform .45s cubic-bezier(.2,.9,.3,1.2),opacity .2s}
+.toast button{background:none;border:0;color:var(--accent-2);font-weight:600;padding:0;filter:brightness(1.3)}
+#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:50}
+
+@media (max-width:860px){.hero{grid-template-columns:1fr}}
+@media (max-width:720px){
+  .row{grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"check q note" ". meta meta" "notep notep notep";padding:10px 10px 10px 12px}
+  .num{display:none}
+  .meta{justify-content:space-between;flex-wrap:wrap;margin-top:6px;row-gap:6px}
+  .note{padding-left:0}
+  .sub{padding-left:50px}
+  .sec-head{padding:12px;gap:10px}
+  .sec-title{font-size:1rem}
+  .ring{width:112px;height:112px}
+  .search kbd{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;animation-delay:0s!important;transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body>
+<canvas id="fx" aria-hidden="true"></canvas>
+<div class="wrap">
+
+  <header class="top">
+    <div class="brand">
+      <span class="eyebrow">Interview prep · pattern by pattern</span>
+      <h1>DSA Pattern <span>Tracker</span></h1>
+      <p><span id="summary-line"></span> Source: <a class="src" id="src-link" href="#" target="_blank" rel="noopener noreferrer"></a></p>
+    </div>
+    <div class="actions">
+      <button class="btn icon-btn" id="theme" type="button" aria-label="Switch colour theme" title="Switch colour theme">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      </button>
+      <details class="menu" id="menu">
+        <summary class="btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+          Backup
+        </summary>
+        <div class="menu-pop">
+          <button type="button" id="export">Export progress (.json)</button>
+          <button type="button" id="import">Import progress…</button>
+          <button type="button" id="reset" class="danger">Reset all progress</button>
+          <small>Progress is saved in this browser. Export a backup before clearing browser data or switching devices.</small>
+        </div>
+      </details>
+      <input type="file" id="import-file" accept="application/json,.json" hidden>
+    </div>
+  </header>
+
+  <section class="hero" aria-label="Progress overview">
+    <div class="card ov">
+      <div class="ov-top">
+        <div class="ring" role="img" id="ring-wrap" aria-label="Overall progress">
+          <svg viewBox="0 0 136 136"><circle class="trk" cx="68" cy="68" r="56"/><circle class="val" id="ring" cx="68" cy="68" r="56"/></svg>
+          <div class="ring-label"><b><span id="pct">0</span><small>%</small></b><span>solved</span></div>
+        </div>
+        <div class="stats">
+          <div class="stat" style="--c:var(--accent)"><b id="n-done">0</b><span>Solved</span></div>
+          <div class="stat" style="--c:var(--doing)"><b id="n-doing">0</b><span>In progress</span></div>
+          <div class="stat" style="--c:var(--revise)"><b id="n-revise">0</b><span>Marked to revise</span></div>
+          <div class="stat" style="--c:var(--line)"><b id="n-left">0</b><span>Left to solve</span></div>
+        </div>
+      </div>
+      <div class="ov-bottom">
+        <div class="streak">
+          <div><b id="streak">0</b><span>day streak</span></div>
+          <div><b id="week">0</b><span>solved in 7 days</span></div>
+          <div><b id="today-n">0</b><span>solved today</span></div>
+        </div>
+        <div class="heat-wrap">
+          <span class="eyebrow">Last 17 weeks</span>
+          <div class="heat" id="heat"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card next" aria-live="polite">
+      <span class="eyebrow">Up next · one question daily</span>
+      <div class="next-idx mono" id="next-idx" aria-hidden="true"></div>
+      <div class="next-body" id="next-body"></div>
+    </div>
+  </section>
+
+  <section class="card strip-card" aria-label="All questions in order">
+    <div class="strip-head">
+      <div>
+        <h2>All <span id="total-h"></span> questions, in order</h2>
+        <p>Each square is one question, grouped by pattern. Click a square to jump to it.</p>
+      </div>
+      <div class="legend">
+        <span><i style="--c:var(--surface-2);box-shadow:inset 0 0 0 1px var(--line)"></i>To do</span>
+        <span><i style="--c:var(--doing)"></i>In progress</span>
+        <span><i style="--c:var(--accent)"></i>Solved</span>
+        <span><i style="--c:var(--revise)"></i>Revise</span>
+      </div>
+    </div>
+    <div class="strip" id="strip"></div>
+  </section>
+
+  <section class="patterns" aria-label="Patterns">
+    <h2>Patterns</h2>
+    <div class="tiles" id="tiles"></div>
+  </section>
+
+  <div class="toolbar" role="search">
+    <label class="search" for="q">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="Search questions or patterns" autocomplete="off">
+      <kbd>/</kbd>
+    </label>
+    <div class="seg" id="seg" role="group" aria-label="Filter by status">
+      <button type="button" data-f="all" aria-pressed="true">All <span class="mono" data-c="all"></span></button>
+      <button type="button" data-f="todo" aria-pressed="false">To do <span class="mono" data-c="todo"></span></button>
+      <button type="button" data-f="doing" aria-pressed="false">In progress <span class="mono" data-c="doing"></span></button>
+      <button type="button" data-f="done" aria-pressed="false">Solved <span class="mono" data-c="done"></span></button>
+      <button type="button" data-f="revise" aria-pressed="false">Revise <span class="mono" data-c="revise"></span></button>
+    </div>
+    <button class="btn" type="button" id="fold">Collapse all</button>
+  </div>
+
+  <main class="list" id="list"></main>
+  <div class="empty" id="empty" hidden><b>No questions match</b>Try a different search or pick another status filter.</div>
+
+  <footer>
+    <span>Tick the box to mark a question solved. Use the status menu for In progress or Revise, and the pencil to keep notes.</span>
+    <span><kbd>/</kbd> search · <kbd>Esc</kbd> clear</span>
+  </footer>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(() => {
+const DATA = [{"t": "1. Pattern: Two Pointers", "items": [{"id": 1, "q": "Pair with Target Sum (easy)", "sub": "", "links": [{"url": "https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/description/"}]}, {"id": 2, "q": "Rearrange 0 and 1", "sub": "", "links": [{"url": "https://www.geeksforgeeks.org/problems/segregate-0s-and-1s5106/1"}]}, {"id": 3, "q": "Remove Duplicates (easy)", "sub": "", "links": [{"url": "https://leetcode.com/problems/remove-duplicates-from-sorted-list/"}, {"url": "https://leetcode.com/problems/remove-duplicates-from-sorted-array/description/"}, {"url": "https://leetcode.com/problems/remove-duplicates-from-sorted-array-ii/"}]}, {"id": 4, "q": "Squaring a Sorted Array (easy)", "sub": "", "links": [{"url": "https://leetcode.com/problems/squares-of-a-sorted-array/"}]}, {"id": 5, "q": "Triplet Sum to Zero (medium)", "sub": "", "links": [{"url": "https://leetcode.com/problems/3sum/"}]}, {"id": 6, "q": "Triplet Sum Close to Target (medium)", "sub": "", "links": [{"url": "https://leetcode.com/problems/3sum-closest/"}]}, {"id": 7, "q": "Triplets with Smaller Sum (medium)", "sub": "", "links": [{"url": "https://www.geeksforgeeks.org/problems/count-triplets-with-sum-smaller-than-x5549/1"}]}, {"id": 8, "q": "Subarrays with Product Less than a Target (medium)", "sub": "", "links": [{"url": "https://leetcode.com/problems/subarray-product-less-than-k/"}]}, {"id": 9, "q": "Dutch National Flag Problem (medium)", "sub": "", "links": [{"url": "https://leetcode.com/problems/sort-colors/description/"}]}, {"id": 10, "q": "Problem Challenge 1: Quadruple Sum to Target (medium)", "sub": "", "links": [{"url": "https://leetcode.com/problems/4sum/"}]}, {"id": 11, "q": "Problem Challenge 2: Comparing Strings containing Backspaces (medium)", "sub": "", "links": [{"url": "https://leetcode.com/problems/backspace-string-compare/"}]}, {"id": 12, "q": "Problem Challenge 3: Minimum Window Sort (medium)", "sub": "", "links": [{"url": "https://leetcode.com/problems/shortest-unsorted-continuous-subarray/"}, {"url": "https://www.ideserve.co.in/learn/minimum-length-subarray-sorting-which-results-in-sorted-array"}]}]}, {"t": "2. Pattern: Fast & Slow pointers", "items": [{"id": 13, "q": "LinkedList Cycle (easy)", "sub": "", "links": [{"url": "https://leetcode.com/problems/linked-list-cycle/"}]}, {"id": 14, "q": "Start of LinkedList Cycle (medium)", "sub": "", "links": [{"url": "https://leetcode.com/problems/linked-list-cycle-ii/"}]}, {"id": 15, "q": "Happy Number (medium)", "sub": "", "links": [{"url": "https://leetcode.com/problems/happy-number/"}]}, {"id": 16, "q": " FIND DUPLICATE NUMBER", "sub": "", "links": [{"url": "https://leetcode.com/problems/find-the-duplicate-number/description/"}]}, {"id": 17, "q": "Middle of the LinkedList (easy)", "sub": "", "links": [{"url": "https://leetcode.com/problems/middle-of-the-linked-list/"}]}, {"id": 18, "q": "Problem Challenge 1: Palindrome LinkedList (medium)", "sub": "", "links": [{"url": "https://leetcode.com/problems/palindrome-linked-list/"}]}, {"id": 19, "q": "Problem Challenge 2: Rearrange a LinkedList (medium)", "sub": "", "links": [{"url": "https://leetcode.com/problems/reorder-list/"}]}, {"id": 20, "q": "Problem Challenge 3: Cycle in a Circular Array (hard)", "sub": "", "links": [{"url": "https://leetcode.com/problems/circular-array-loop/"}]}]}, {"t": "3. Pattern: Sliding Window", "items": [{"id": 21, "q": "Maximum Sum Subarray of Size K (easy)", "sub": "", "links": [{"url": "https://www.geeksforgeeks.org/problems/max-sum-subarray-of-size-k5313/1"}]}, {"id": 22, "q": "Smallest Subarray with a given sum (easy)", "sub": "", "links": [{"url": "https://leetcode.com/problems/minimum-size-subarray-sum/"}]}, {"id": 23, "q": "Longest Substring with K Distinct Characters (medium)", "sub": "", "links": [{"url": "https://www.geeksforgeeks.org/problems/longest-k-unique-characters-substring0853/1"}]}, {"id": 24, "q": "Fruits into Baskets (medium)", "sub": "", "links": [{"url": "https://leetcode.com/problems/fruit-into-baskets/"}]}, {"id": 25, "q": "No-repeat Substring (hard)", "sub": "", "links": [{"url": "https://leetcode.com/problems/longest-substring-without-repeating-characters/"}]}, {"id": 26, "q": "Longest Substring with Same Letters after Replacement (hard)", "sub": "", "links": [{"url": "https://leetcode.com/problems/longest-repeating-character-replacement/"}]}, {"id": 27, "q": "Longest Subarray with Ones after Replacement (hard)", "sub": "", "links": [{"url": "https://leetcode.com/problems/max-consecutive-ones-iii/"}]}, {"id": 28, "q": "Minimum size subarray SUM", "sub": "", "links": [{"url": "https://leetcode.com/problems/minimum-size-subarray-sum/"}]}, {"id": 29, "q": "MInimum Size Substring (HARD)", "sub": "", "links": [{"url": "https://leetcode.com/problems/minimum-window-substring/description/?envType=study-plan-v2&envId=top-interview-150"}]}, {"id": 30, "q": "Problem Challenge 1: Permutation in a String (hard)", "sub": "", "links": [{"url": "https://leetcode.com/problems/permutation-in-string/"}]}, {"id": 31, "q": "Problem Challenge 2: String Anagrams (hard)", "sub": "", "links": [{"url": "https://leetcode.com/problems/find-all-anagrams-in-a-string/"}]}, {"id": 32, "q": "Problem Challenge 4: Words Concatenation (hard)", "sub": "", "links": [{"url": "https://leetcode.com/problems/substring-with-concatenation-of-all-words/"}]}]}, {"t": "Pattern: Kadane pattern", "items": [{"id": 33, "q": "Maximum subarray sum", "sub": "", "links": [{"url": "https://leetcode.com/problems/maximum-subarray/?utm_source=chatgpt.com"}]}, {"id": 34, "q": "Minimum Subarray Sum", "sub": "", "links": [{"url": "https://www.geeksforgeeks.org/problems/smallest-sum-contiguous-subarray/1"}]}, {"id": 35, "q": "Maximum product subarray", "sub": "", "links": [{"url": "https://leetcode.com/problems/maximum-product-subarray/?utm_source=chatgpt.com"}]}, {"id": 36, "q": "Maximum subarray sum with one deletion", "sub": "", "links": [{"url": "https://leetcode.com/problems/maximum-subarray-sum-with-one-deletion/description/"}]}, {"id": 37, "q": "Maximum absolute sum of any subarray", "sub": "", "links": [{"url": "https://leetcode.com/problems/maximum-absolute-sum-of-any-subarray/"}]}, {"id": 38, "q": "Maximum sum in circular array variant", "sub": "", "links": [{"url": "https://leetcode.com/problems/maximum-sum-circular-subarray/?utm_source=chatgpt.com"}]}]}, {"t": "PATTERN: PREFIX SUM", "items": [{"id": 39, "q": "Subarray Sum Equals K (EASY)", "sub": "", "links": [{"url": "https://leetcode.com/problems/subarray-sum-equals-k/description/"}]}, {"id": 40, "q": "Find Pivot Index (EASY)", "sub": "", "links": [{"url": "https://leetcode.com/problems/find-pivot-index/description/"}]}, {"id": 41, "q": "Subarray Sums Divisible By K (Med)", "sub": "", "links": [{"url": "https://leetcode.com/problems/subarray-sums-divisible-by-k/description/"}]}, {"id": 42, "q": "Contiguous array (MED)", "sub": "", "links": [{"url": "https://leetcode.com/problems/contiguous-array/description/"}]}, {"id": 43, "q": "Problem challenge: Shortest Subarray With Sum at Least K (HARD)", "sub": "", "links": [{"url": "https://leetcode.com/problems/shortest-subarray-with-sum-at-least-k/description/"}]}, {"id": 44, "q": "Problem challenge: Count Range Sum (hard)", "sub": "", "links": [{"url": "https://leetcode.com/problems/count-of-range-sum/description/"}]}]}, {"t": "4. Pattern: Merge Intervals", "items": [{"id": 45, "q": "Merge Intervals (medium)", "sub": "", "links": [{"url": "https://leetcode.com/problems/merge-intervals/description/"}]}, {"id": 46, "q": "Insert Interval (medium)", "sub": "", "links": [{"url": "https://leetcode.com/problems/insert-interval/"}]}, {"id": 47, "q": "Intervals Intersection (medium)", "sub": "", "links": [{"url": "https://leetcode.com/problems/interval-list-intersections/description/"}]}, {"id": 48, "q": "Overlapping Intervals", "sub": "", "links": [{"url": "https://www.geeksforgeeks.org/check-if-any-two-intervals-overlap-among-a-given-set-of-intervals/"}]}, {"id": 49, "q": "Problem Challenge 1: Minimum Meeting Rooms (hard)", "sub": "", "links": [{"url": "https://www.geeksforgeeks.org/problems/attend-all-meetings-ii/1"}]}, {"id": 50, "q": "Problem Challenge 2: Maximum CPU Load (hard)", "sub": "", "links": [{"url": "https://www.geeksforgeeks.org/maximum-cpu-load-from-the-given-list-of-jobs/"}]}, {"id": 51, "q": "Problem Challenge 3: Employee Free Time (hard)", "sub": "", "links": [{"url": "https://www.codertrain.co/employee-free-time"}]}]}, {"t": "6. Pattern: In-place Reversal of a LinkedList", "items": [{"id": 52, "q": "Reverse a LinkedList (easy)", "sub": "", "links": [{"url": "https://leetcode.com/problems/reverse-linked-list/"}]}, {"id": 53, "q": "Reverse a Sub-list (medium)", "sub": "", "links": [{"url": "https://leetcode.com/problems/reverse-linked-list-ii/"}]}, {"id": 54, "q": "Reverse List in Pairs (Medium)", "sub": "", "links": [{"url": "https://leetcode.com/problems/swap-nodes-in-pairs/description/"}]}, {"id": 55, "q": "Reverse every K-element Sub-list (HARD)", "sub": "", "links": [{"url": "https://leetcode.com/problems/reverse-nodes-in-k-group/"}]}, {"id": 56, "q": "Problem Challenge 1: Reverse nodes in EVEN Length Groups (HARD)", "sub": "", "links": [{"url": "https://leetcode.com/problems/reverse-nodes-in-even-length-groups/description/"}]}, {"id": 57, "q": "Problem Challenge 2: Rotate a LinkedList (medium)", "sub": "", "links": [{"url": "https://leetcode.com/problems/rotate-list/"}]}]}, {"t": "7. Pattern: Stack", "items": [{"id": 58, "q": "remove adjacent duplicates", "sub": "", "links": [{"url": "https://leetcode.com/problems/remove-all-adjacent-duplicates-in-string/description/"}]}, {"id": 59, "q": "Balanced Parentheses", "sub": "", "links": [{"url": "https://leetcode.com/problems/valid-parentheses/description/"}]}, {"id": 60, "q": "Reverse a String", "sub": "", "links": []}, {"id": 61, "q": "Next Greater Element (easy)", "sub": "", "links": [{"url": "https://leetcode.com/problems/next-greater-element-ii/description/"}]}, {"id": 62, "q": "Daily Temperatures (easy)", "sub": "", "links": [{"url": "https://leetcode.com/problems/daily-temperatures/"}]}, {"id": 63, "q": "Remove Nodes From Linked List (easy)", "sub": "", "links": [{"url": "https://leetcode.com/problems/remove-nodes-from-linked-list/"}]}, {"id": 64, "q": "Remove All Adjacent Duplicates in String II (medium)", "sub": "", "links": [{"url": "https://leetcode.com/problems/remove-all-adjacent-duplicates-in-string-ii/"}]}, {"id": 65, "q": "Simplify Path (Problem Challenge) ", "sub": "", "links": [{"url": "https://leetcode.com/problems/simplify-path/"}]}, {"id": 66, "q": "Remove K Digits (hard) Problem challenge", "sub": "", "links": [{"url": "https://leetcode.com/problems/remove-k-digits/"}]}]}, {"t": "9. Pattern: Hash Maps", "items": [{"id": 67, "q": "First Non-repeating Character (easy)", "sub": "", "links": [{"url": "https://leetcode.com/problems/first-unique-character-in-a-string/"}]}, {"id": 68, "q": "Maximum Number of Balloons (easy)", "sub": "", "links": [{"url": "https://leetcode.com/problems/maximum-number-of-balloons/"}]}, {"id": 69, "q": "Longest Palindrome(easy)", "sub": "", "links": [{"url": "https://leetcode.com/problems/longest-palindrome/"}]}, {"id": 70, "q": "Ransom Note (easy)", "sub": "", "links": [{"url": "https://leetcode.com/problems/ransom-note/"}]}]}, {"t": "10. Pattern : Binary Search", "items": [{"id": 71, "q": "Binary search basic", "sub": "", "links": [{"url": "https://leetcode.com/problems/binary-search/"}]}, {"id": 72, "q": "Upper Bound/ Ceiling", "sub": "", "links": [{"url": "https://www.geeksforgeeks.org/problems/ceil-in-a-sorted-array/1"}]}, {"id": 73, "q": "First and Last position", "sub": "", "links": [{"url": "https://leetcode.com/problems/find-first-and-last-position-of-element-in-sorted-array/"}]}, {"id": 74, "q": "Count number of occurences", "sub": "", "links": [{"url": "https://www.geeksforgeeks.org/problems/number-of-occurrence2259/1"}]}, {"id": 75, "q": "Search in infinite Sorted array", "sub": "", "links": [{"url": "https://www.geeksforgeeks.org/find-position-element-sorted-array-infinite-numbers/"}]}, {"id": 76, "q": "Peak index in Mountain", "sub": "", "links": [{"url": "https://leetcode.com/problems/peak-index-in-a-mountain-array/"}]}, {"id": 77, "q": "Find peak in mountain range", "sub": "", "links": [{"url": "https://leetcode.com/problems/find-peak-element/"}]}, {"id": 78, "q": "Find minimum in rotated sorted array", "sub": "", "links": [{"url": "https://leetcode.com/problems/find-minimum-in-rotated-sorted-array/"}]}, {"id": 79, "q": "Find number of rotations to sorted array", "sub": "", "links": [{"url": "https://www.geeksforgeeks.org/problems/rotation4723/1"}]}, {"id": 80, "q": "Search in rotated sorted array", "sub": "", "links": [{"url": "https://leetcode.com/problems/search-in-rotated-sorted-array/description/"}]}, {"id": 81, "q": "KOKO eating BANANAS", "sub": "", "links": [{"url": "https://leetcode.com/problems/koko-eating-bananas/"}]}, {"id": 82, "q": "Min num of days to make m bouquets", "sub": "", "links": [{"url": "https://leetcode.com/problems/minimum-number-of-days-to-make-m-bouquets/"}]}, {"id": 83, "q": "Aggresive cows", "sub": "", "links": [{"url": "https://www.geeksforgeeks.org/problems/aggressive-cows/1"}]}, {"id": 84, "q": "H index 2", "sub": "", "links": [{"url": "https://leetcode.com/problems/h-index-ii/description/"}]}, {"id": 85, "q": "Max candies to k children", "sub": "", "links": [{"url": "https://leetcode.com/problems/maximum-candies-allocated-to-k-children/description/"}]}, {"id": 86, "q": "Capacity to ship packages in d days", "sub": "", "links": [{"url": "https://leetcode.com/problems/capacity-to-ship-packages-within-d-days/description/"}]}, {"id": 87, "q": "Book Allocation Problem", "sub": "", "links": [{"url": "https://www.geeksforgeeks.org/problems/allocate-minimum-number-of-pages0937/1"}]}, {"id": 88, "q": "Split largest arrray", "sub": "", "links": [{"url": "https://leetcode.com/problems/split-array-largest-sum/description/"}]}, {"id": 89, "q": "Search 2 D matrix", "sub": "", "links": [{"url": "https://leetcode.com/problems/search-a-2d-matrix/"}]}, {"id": 90, "q": "Search 2D matrix (Hard)", "sub": "", "links": [{"url": "https://leetcode.com/problems/search-a-2d-matrix-ii/description/"}]}, {"id": 91, "q": "kth smallest in sorted matrix", "sub": "", "links": [{"url": "https://leetcode.com/problems/kth-smallest-element-in-a-sorted-matrix/description/"}]}, {"id": 92, "q": "kth smallest in multiplication matrix", "sub": "", "links": [{"url": "https://leetcode.com/problems/kth-smallest-number-in-multiplication-table/description/"}]}, {"id": 93, "q": "median of 2 sorted arrays", "sub": "", "links": [{"url": "https://leetcode.com/problems/median-of-two-sorted-arrays/"}]}]}, {"t": "HEAP PATTERN", "items": [{"id": 94, "q": "kth smallest", "sub": "Kth ", "links": [{"url": "https://www.geeksforgeeks.org/problems/kth-smallest-element5635/1"}]}, {"id": 95, "q": "kth largest", "sub": "", "links": [{"url": "https://leetcode.com/problems/kth-largest-element-in-an-array/description/"}]}, {"id": 96, "q": "TOP K frequent Elements", "sub": "", "links": [{"url": "https://leetcode.com/problems/top-k-frequent-elements/description/"}]}, {"id": 97, "q": "Top K frequent Words", "sub": "", "links": [{"url": "https://leetcode.com/problems/top-k-frequent-words/description/"}]}, {"id": 98, "q": "K closest points to origin", "sub": "K closest", "links": [{"url": "https://leetcode.com/problems/k-closest-points-to-origin/description/"}]}, {"id": 99, "q": "Find K closest elements", "sub": "", "links": [{"url": "https://leetcode.com/problems/find-k-closest-elements/description/"}]}, {"id": 100, "q": "Kth weakest row in Matrix", "sub": "", "links": [{"url": "https://leetcode.com/problems/the-k-weakest-rows-in-a-matrix/description/"}]}, {"id": 101, "q": "Merge K Sorted Arrays", "sub": "heap as pointer", "links": [{"url": "https://www.geeksforgeeks.org/problems/merge-k-sorted-arrays/1"}]}, {"id": 102, "q": "Kth Smallest in Sorted Matrix", "sub": "", "links": [{"url": "https://leetcode.com/problems/kth-smallest-element-in-a-sorted-matrix/description/"}]}, {"id": 103, "q": "LAST STONE WEIGHT", "sub": "GREEDY+heap", "links": [{"url": "https://leetcode.com/problems/last-stone-weight/description/"}]}, {"id": 104, "q": "CPU Task Scheduler", "sub": "", "links": [{"url": "https://leetcode.com/problems/task-scheduler/description/"}]}, {"id": 105, "q": "Reorganize String", "sub": "", "links": [{"url": "https://leetcode.com/problems/reorganize-string/"}]}, {"id": 106, "q": "Min number of refueling stops", "sub": "", "links": [{"url": "https://leetcode.com/problems/minimum-number-of-refueling-stops/description/"}]}, {"id": 107, "q": "IPO", "sub": "", "links": [{"url": "https://leetcode.com/problems/ipo/description/"}]}, {"id": 108, "q": "Course Scheduler 3", "sub": "", "links": [{"url": "https://leetcode.com/problems/course-schedule-iii/description/"}]}, {"id": 109, "q": "Find median in data stream", "sub": "2 heaps", "links": [{"url": "https://leetcode.com/problems/find-median-from-data-stream/description/"}]}, {"id": 110, "q": "Sliding Window Median (hard)", "sub": "", "links": [{"url": "https://leetcode.com/problems/sliding-window-median/description/"}]}]}, {"t": "Recursion and Backtracking Pattern", "items": [{"id": 111, "q": "Fibonnaci", "sub": "", "links": [{"url": "https://leetcode.com/problems/fibonacci-number/description/"}, {"url": "https://www.youtube.com/watch?v=j4wjZqzhMqc&t"}]}, {"id": 112, "q": "Check if string is Pallindrome", "sub": "", "links": [{"url": "https://www.geeksforgeeks.org/problems/palindrome-string0817/1"}, {"url": "https://www.youtube.com/watch?v=j4wjZqzhMqc&t"}]}, {"id": 113, "q": "Check if Array is Sorted", "sub": "", "links": [{"url": "https://www.geeksforgeeks.org/problems/check-if-an-array-is-sorted0701/1"}, {"url": "https://www.youtube.com/watch?v=-gC-QEdpvO4"}]}, {"id": 114, "q": "Sum of digits of a number", "sub": "", "links": [{"url": "https://www.geeksforgeeks.org/problems/sum-of-digits1742/1"}, {"url": "https://www.youtube.com/watch?v=-gC-QEdpvO4"}]}, {"id": 115, "q": "Remove occurences of a character in string", "sub": "", "links": [{"url": "https://www.geeksforgeeks.org/problems/remove-all-occurrences-of-a-character-in-a-string/1"}, {"url": "https://www.youtube.com/watch?v=-gC-QEdpvO4"}]}, {"id": 116, "q": "Generate parenthesis", "sub": "", "links": [{"url": "https://leetcode.com/problems/generate-parentheses/description/"}]}, {"id": 117, "q": "Letter Combinations of phone number", "sub": "", "links": [{"url": "https://leetcode.com/problems/letter-combinations-of-a-phone-number/description/"}, {"url": "https://www.youtube.com/watch?v=IKfIT6uFOcs"}]}, {"id": 118, "q": "Permutations", "sub": "", "links": [{"url": "https://leetcode.com/problems/permutations/description/"}]}, {"id": 119, "q": "Combination Sum", "sub": "", "links": [{"url": "https://leetcode.com/problems/combination-sum/description/"}]}, {"id": 120, "q": "Pallindrome partition", "sub": "", "links": [{"url": "https://leetcode.com/problems/palindrome-partitioning/description/"}]}]}, {"t": "Tree Pattern", "items": [{"id": 121, "q": "Inorder", "sub": "Traversal", "links": [{"url": "https://leetcode.com/problems/binary-tree-inorder-traversal/description/"}]}, {"id": 122, "q": "Preorder", "sub": "", "links": [{"url": "https://leetcode.com/problems/binary-tree-preorder-traversal/description/"}]}, {"id": 123, "q": "Postorder", "sub": "", "links": [{"url": "https://leetcode.com/problems/binary-tree-postorder-traversal/description/"}, {"text": "Homework"}]}, {"id": 124, "q": "Level Order", "sub": "", "links": [{"url": "https://leetcode.com/problems/binary-tree-level-order-traversal/description/"}]}, {"id": 125, "q": "ZigZag Order", "sub": "", "links": [{"url": "https://leetcode.com/problems/binary-tree-zigzag-level-order-traversal/description/"}]}, {"id": 126, "q": "Level Order II", "sub": "", "links": [{"url": "https://leetcode.com/problems/binary-tree-level-order-traversal-ii/description/"}, {"text": "Homework"}]}, {"id": 127, "q": "Invert Tree", "sub": "Mirror and Symmetry", "links": [{"url": "https://leetcode.com/problems/invert-binary-tree/description/"}]}, {"id": 128, "q": "Symmetric Tree", "sub": "", "links": [{"url": "https://leetcode.com/problems/symmetric-tree/description/"}]}, {"id": 129, "q": "Same Tree", "sub": "", "links": [{"url": "https://leetcode.com/problems/same-tree/description/"}, {"text": "Homework"}]}, {"id": 130, "q": "Subtree of another TREE", "sub": "", "links": [{"url": "https://leetcode.com/problems/subtree-of-another-tree/description/"}]}, {"id": 131, "q": "Flip Equivalent Tree", "sub": "", "links": [{"url": "https://leetcode.com/problems/flip-equivalent-binary-trees/description/"}]}, {"id": 132, "q": "LCA of Binary TREE", "sub": "Search", "links": [{"url": "https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree/description/"}]}, {"id": 133, "q": "Binary Search Tree", "sub": "", "links": [{"url": "https://leetcode.com/problems/search-in-a-binary-search-tree/"}]}, {"id": 134, "q": "LCA of BST", "sub": "", "links": [{"url": "https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree/description/"}]}, {"id": 135, "q": "LCA of Deepest Leaves", "sub": "", "links": [{"url": "https://leetcode.com/problems/lowest-common-ancestor-of-deepest-leaves/description/"}]}, {"id": 136, "q": "Two Sum IV", "sub": "", "links": [{"url": "https://leetcode.com/problems/two-sum-iv-input-is-a-bst/description/"}]}, {"id": 137, "q": "Kth smallest element in BST", "sub": "", "links": [{"url": "https://leetcode.com/problems/kth-smallest-element-in-a-bst/description/"}]}, {"id": 138, "q": "Minimum Depth of Binary Tree", "sub": "Validation", "links": [{"url": "https://leetcode.com/problems/minimum-depth-of-binary-tree/description/"}]}, {"id": 139, "q": "Maximum Depth of Binary Tree", "sub": "", "links": [{"url": "https://leetcode.com/problems/maximum-depth-of-binary-tree/description/"}]}, {"id": 140, "q": "Balanced Binary Tree", "sub": "", "links": [{"url": "https://leetcode.com/problems/balanced-binary-tree/description/"}]}, {"id": 141, "q": "Diameter of Binary Tree", "sub": "", "links": [{"url": "https://leetcode.com/problems/diameter-of-binary-tree/description/"}]}, {"id": 142, "q": "Check Completeness of Binary Tree", "sub": "", "links": [{"url": "https://leetcode.com/problems/check-completeness-of-a-binary-tree/description/"}]}, {"id": 143, "q": "Validate BST", "sub": "", "links": [{"url": "https://leetcode.com/problems/validate-binary-search-tree/description/"}]}, {"id": 144, "q": "Recover BST", "sub": "", "links": [{"url": "https://leetcode.com/problems/recover-binary-search-tree/description/"}]}, {"id": 145, "q": "Path Sum", "sub": "Path SUM", "links": [{"url": "https://leetcode.com/problems/path-sum/description/"}]}, {"id": 146, "q": "Path Sum II", "sub": "", "links": [{"url": "https://leetcode.com/problems/path-sum-ii/"}]}, {"id": 147, "q": "Sum of Root to Leaf", "sub": "", "links": [{"url": "https://leetcode.com/problems/sum-root-to-leaf-numbers/description/"}]}, {"id": 148, "q": "Maximum Path Sum", "sub": "", "links": [{"url": "https://leetcode.com/problems/binary-tree-maximum-path-sum/description/"}]}, {"id": 149, "q": "Contruct tree from preorder and inorder", "sub": "Construction", "links": [{"url": "https://leetcode.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal/description/"}]}, {"id": 150, "q": "Contruct tree from postorder and inorder", "sub": "", "links": [{"url": "https://leetcode.com/problems/construct-binary-tree-from-inorder-and-postorder-traversal/description/"}]}, {"id": 151, "q": "Sorted Array to BST", "sub": "", "links": [{"url": "https://leetcode.com/problems/convert-sorted-array-to-binary-search-tree/description/"}]}]}, {"t": "GRAPHS", "items": [{"id": 152, "q": "Construct Adjancency List from EDGES+Nodes", "sub": "", "links": [{"url": "https://www.geeksforgeeks.org/problems/print-adjacency-list-1587115620/1"}]}, {"id": 153, "q": "Graph DFS", "sub": "", "links": [{"url": "https://www.geeksforgeeks.org/problems/depth-first-traversal-for-a-graph/1"}]}, {"id": 154, "q": "GRAPH BFS", "sub": "", "links": [{"url": "https://www.geeksforgeeks.org/problems/bfs-traversal-of-graph/1"}]}, {"id": 155, "q": "Number of Islands", "sub": "", "links": [{"url": "https://leetcode.com/problems/number-of-islands/description/"}]}, {"id": 156, "q": "Number of Provinces", "sub": "", "links": [{"url": "https://leetcode.com/problems/number-of-provinces/description/"}]}, {"id": 157, "q": "Rotten Oranges", "sub": "", "links": [{"url": "https://leetcode.com/problems/rotting-oranges/"}]}, {"id": 158, "q": "Cycle detection in undirected graph", "sub": "", "links": [{"url": "https://www.geeksforgeeks.org/problems/detect-cycle-in-an-undirected-graph/1"}]}, {"id": 159, "q": "Cycle detection in directed graph", "sub": "", "links": [{"url": "https://www.geeksforgeeks.org/problems/detect-cycle-in-a-directed-graph/1"}]}, {"id": 160, "q": "Topological sort", "sub": "", "links": [{"url": "https://www.geeksforgeeks.org/problems/topological-sort/1"}]}, {"id": 161, "q": "Bipartite Graph/ Graph Coloring", "sub": "", "links": [{"url": "https://leetcode.com/problems/is-graph-bipartite/"}]}, {"id": 162, "q": "Surrounded Regoins", "sub": "", "links": [{"url": "https://leetcode.com/problems/surrounded-regions/"}]}, {"id": 163, "q": "Shortest Path in Non-Weighted Graph", "sub": "", "links": [{"url": "https://www.geeksforgeeks.org/problems/shortest-path-in-undirected-graph-having-unit-distance/1"}]}, {"id": 164, "q": "Dijkstra's Algorithm", "sub": "", "links": [{"url": "https://www.geeksforgeeks.org/problems/implementing-dijkstra-set-1-adjacency-matrix/1"}]}, {"id": 165, "q": "Network Delay", "sub": "", "links": [{"url": "https://leetcode.com/problems/network-delay-time/"}]}, {"id": 166, "q": "Path With Minimum Effort", "sub": "", "links": [{"url": "https://leetcode.com/problems/path-with-minimum-effort/"}]}, {"id": 167, "q": "Swim in Rising Water", "sub": "", "links": [{"url": "https://leetcode.com/problems/swim-in-rising-water/"}]}, {"id": 168, "q": "Bellman ford", "sub": "", "links": [{"url": "https://www.geeksforgeeks.org/problems/distance-from-the-source-bellman-ford-algorithm/1"}]}, {"id": 169, "q": "Cheapest Path in K stops", "sub": "", "links": [{"url": "https://leetcode.com/problems/cheapest-flights-within-k-stops/description/"}]}, {"id": 170, "q": "Prim MST", "sub": "", "links": [{"url": "https://www.geeksforgeeks.org/problems/minimum-spanning-tree/1"}]}, {"id": 171, "q": "Word Ladder", "sub": "", "links": [{"url": "https://leetcode.com/problems/word-ladder/"}]}]}, {"t": "DP (Dynamic Programming)", "items": [{"id": 172, "q": "Episode-02: Fibonacci", "sub": "", "links": [{"url": "https://leetcode.com/problems/fibonacci-number/description/"}]}, {"id": 173, "q": "Episode 03: Climbing Stairs", "sub": "", "links": [{"url": "https://leetcode.com/problems/climbing-stairs/description/"}]}, {"id": 174, "q": "Episode 04: House Robber", "sub": "", "links": [{"url": "https://leetcode.com/problems/house-robber/"}]}, {"id": 175, "q": "Episode 05: 0/1 Knapsack", "sub": "", "links": [{"url": "https://www.geeksforgeeks.org/problems/0-1-knapsack-problem0945/1"}]}, {"id": 176, "q": "Episode 06: tabulation Intro", "sub": "", "links": []}, {"id": 177, "q": "Episode 07: 0/1 Knapsack Tabulation", "sub": "", "links": [{"url": "https://www.geeksforgeeks.org/problems/0-1-knapsack-problem0945/1"}]}, {"id": 178, "q": "Episode 08: Subset sum", "sub": "", "links": [{"url": "https://www.geeksforgeeks.org/problems/subset-sum-problem-1611555638/1"}]}, {"id": 179, "q": "Episode 09 : Target Sum", "sub": "", "links": [{"url": "https://www.geeksforgeeks.org/problems/target-sum-1626326450/1"}]}, {"id": 180, "q": "Episode 10 : LIS", "sub": "", "links": [{"url": "https://leetcode.com/problems/longest-increasing-subsequence/"}]}, {"id": 181, "q": "Episode 11 : LIS Tabulation", "sub": "", "links": []}, {"id": 182, "q": "Episode 12 : LCS", "sub": "", "links": [{"url": "https://leetcode.com/problems/longest-common-subsequence/description/"}]}, {"id": 183, "q": "Episode 13 : Unique Paths", "sub": "", "links": [{"url": "https://leetcode.com/problems/unique-paths/description/"}]}, {"id": 184, "q": "Episode 14: Buy Sell Stocks", "sub": "", "links": [{"url": "https://leetcode.com/problems/best-time-to-buy-and-sell-stock/description/"}]}, {"id": 185, "q": "", "sub": "", "links": [{"url": "https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii/description/"}]}, {"id": 186, "q": "", "sub": "", "links": [{"url": "https://leetcode.com/problems/best-time-to-buy-and-sell-stock-iii/description/"}]}, {"id": 187, "q": "", "sub": "", "links": [{"url": "https://leetcode.com/problems/best-time-to-buy-and-sell-stock-iv/description/"}]}, {"id": 188, "q": "Episode 15: MIn cost to cut stick", "sub": "", "links": [{"url": "https://leetcode.com/problems/minimum-cost-to-cut-a-stick/"}]}, {"id": 189, "q": "Episode 16: Revision", "sub": "", "links": []}]}];
+const SOURCE = {"text": "INSTA Channel. One question Daily", "url": "https://www.instagram.com/thoda_padhh_lo?igsh=emRlZjNsbHlsdHM4&utm_source=qr"};
+const KEY = "dsa-pattern-tracker:v1";
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const LABEL = { todo: "To do", doing: "In progress", done: "Solved", revise: "Revise" };
+const STATUSES = Object.keys(LABEL);
+const isSolved = s => s === "done" || s === "revise";
+
+/* ---------- State ---------- */
+let state = { items: {}, collapsed: {}, theme: null };
+try {
+  const raw = localStorage.getItem(KEY);
+  if (raw) {
+    const p = JSON.parse(raw);
+    if (p && typeof p === "object") {
+      state.items = p.items && typeof p.items === "object" ? p.items : {};
+      state.collapsed = p.collapsed && typeof p.collapsed === "object" ? p.collapsed : {};
+      state.theme = p.theme === "light" || p.theme === "dark" ? p.theme : null;
+    }
+  }
+} catch (e) {}
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} };
+if (state.theme) document.documentElement.dataset.theme = state.theme;
+
+const ITEMS = [];
+DATA.forEach((sec, si) => {
+  let grp = "";
+  sec.items.forEach(it => {
+    if (it.sub && it.sub.trim()) grp = it.sub.trim();
+    it.si = si; it.grp = grp;
+    ITEMS.push(it);
+  });
+});
+const BYID = new Map(ITEMS.map(it => [it.id, it]));
+const TOTAL = ITEMS.length;
+const statusOf = id => (state.items[id] && STATUSES.includes(state.items[id].s)) ? state.items[id].s : "todo";
+
+/* ---------- Helpers ---------- */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const pad = n => String(n).padStart(3, "0");
+const dstr = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+const todayStr = () => dstr(new Date());
+const parseD = s => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
+const fmtDate = s => parseD(s).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+const site = u => {
+  let h = ""; try { h = new URL(u).hostname; } catch (e) {}
+  if (h.includes("leetcode")) return "LeetCode";
+  if (h.includes("geeksforgeeks")) return "GFG";
+  if (h.includes("youtube")) return "YouTube";
+  if (h.includes("ideserve")) return "IDeserve";
+  if (h.includes("codertrain")) return "CoderTrain";
+  return "Link";
+};
+const slug = it => {
+  const l = it.links.find(x => x.url);
+  if (!l) return "";
+  const m = l.url.match(/problems\/([^/?#]+)/);
+  return m ? m[1] : l.url;
+};
+const title = it => it.q.trim() ? it.q.trim() : slug(it);
+ITEMS.forEach(it => { it.hay = [it.q, it.grp, slug(it)].join(" ").toLowerCase(); });
+
+const ARROW = '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.5l5-5M4.5 3.5h4v4"/></svg>';
+const linksHTML = it => it.links.map(l => l.url
+  ? `<a class="lk" href="${esc(l.url)}" target="_blank" rel="noopener noreferrer" title="${esc(l.url)}">${site(l.url)}${ARROW}</a>`
+  : `<span class="tag">${esc(l.text)}</span>`).join("");
+
+/* ---------- Render: sections & rows ---------- */
+const listEl = $("#list");
+function rowHTML(it) {
+  const s = statusOf(it.id), rec = state.items[it.id] || {};
+  const q = it.q.trim()
+    ? `<span class="q">${esc(it.q)}</span>`
+    : `<span class="q derived" title="This row has no question text in the original sheet. The name comes from its link.">↳ ${esc(slug(it))}</span>`;
+  const opts = STATUSES.map(v => `<option value="${v}"${v === s ? " selected" : ""}>${LABEL[v]}</option>`).join("");
+  return `${it.sub && it.sub.trim() ? `<div class="sub" data-si="${it.si}"><span>${esc(it.sub.trim())}</span></div>` : ""}
+  <div class="row" id="q-${it.id}" data-id="${it.id}" data-s="${s}">
+    <button class="check" type="button" aria-pressed="${isSolved(s)}" aria-label="Mark ${esc(title(it))} as solved"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.2 4.2L19 7.5"/></svg></button>
+    <span class="num">${pad(it.id)}</span>
+    <div class="qcol">${q}<span class="when">${rec.d && isSolved(s) ? "Solved " + fmtDate(rec.d) : ""}</span></div>
+    <div class="meta">
+      <div class="links">${linksHTML(it)}</div>
+      <span class="sel"><label class="sr" for="st-${it.id}">Status</label><select class="status" id="st-${it.id}">${opts}</select></span>
+    </div>
+    <button class="note-btn${rec.n ? " has" : ""}" type="button" aria-expanded="false" aria-label="Notes" title="Notes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button>
+    <div class="note" hidden><label class="sr" for="nt-${it.id}">Notes</label><textarea id="nt-${it.id}" rows="2" placeholder="Approach, complexity, edge cases, mistakes to avoid">${esc(rec.n || "")}</textarea></div>
+  </div>`;
+}
+const RC = 2 * Math.PI * 15, BIG = 2 * Math.PI * 56;
+listEl.innerHTML = DATA.map((sec, si) => `
+  <section class="sec${state.collapsed[si] ? " collapsed" : ""}" id="sec-${si}" style="--d:${si}">
+    <button class="sec-head" type="button" aria-expanded="${!state.collapsed[si]}" aria-controls="secb-${si}">
+      <span class="sec-ring"><svg viewBox="0 0 36 36"><circle class="trk" cx="18" cy="18" r="15"/><circle class="val" cx="18" cy="18" r="15" stroke-dasharray="${RC}" stroke-dashoffset="${RC}"/></svg><svg class="tick" viewBox="0 0 36 36"><path d="M12 18.5l4 4 8-9"/></svg></span>
+      <span class="sec-title">${esc(sec.t)}</span>
+      <span class="sec-count mono"><b>0</b> / ${sec.items.length}</span>
+      <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+      <span class="sec-bar"><i></i></span>
+    </button>
+    <div class="sec-body" id="secb-${si}"><div class="sec-inner">${sec.items.map(rowHTML).join("")}</div></div>
+  </section>`).join("");
+
+$("#strip").innerHTML = DATA.map(sec => `<div class="sg">${sec.items.map(it =>
+  `<button class="cell" type="button" tabindex="-1" data-id="${it.id}" data-s="${statusOf(it.id)}" style="--i:${it.id}" title="${pad(it.id)} · ${esc(title(it))} (${esc(sec.t)})" aria-label="${pad(it.id)} ${esc(title(it))}"></button>`).join("")}</div>`).join("");
+
+$("#tiles").innerHTML = DATA.map((sec, si) => `
+  <button class="tile" type="button" data-si="${si}">
+    <span class="tile-t">${esc(sec.t)}</span>
+    <span class="tile-m"><span class="bar"><i></i></span><span class="tile-c mono"></span></span>
+  </button>`).join("");
+
+$("#src-link").textContent = SOURCE.text + " ↗";
+$("#src-link").href = SOURCE.url;
+$("#summary-line").textContent = `${TOTAL} questions across ${DATA.length} patterns, in the original sheet order.`;
+$("#total-h").textContent = TOTAL;
+$("#ring").setAttribute("stroke-dasharray", BIG);
+$("#ring").setAttribute("stroke-dashoffset", BIG);
+
+/* ---------- Counting ---------- */
+const secSolved = si => DATA[si].items.filter(it => isSolved(statusOf(it.id))).length;
+const counts = () => {
+  const c = { todo: 0, doing: 0, done: 0, revise: 0 };
+  ITEMS.forEach(it => c[statusOf(it.id)]++);
+  return c;
+};
+function tween(el, to) {
+  const from = Number(el.dataset.v || 0);
+  el.dataset.v = to;
+  if (reduce || from === to) { el.textContent = to; return; }
+  const tok = el._tok = {};
+  const t0 = performance.now(), dur = 750;
+  const step = t => {
+    if (el._tok !== tok) return;
+    const p = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.round(from + (to - from) * e);
+    if (p < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
+/* ---------- Refresh (all derived UI) ---------- */
+let filter = "all";
+function refresh() {
+  const c = counts(), solved = c.done + c.revise, pct = Math.round((solved / TOTAL) * 100);
+  tween($("#pct"), pct); tween($("#n-done"), solved); tween($("#n-doing"), c.doing);
+  tween($("#n-revise"), c.revise); tween($("#n-left"), TOTAL - solved);
+  $("#ring").setAttribute("stroke-dashoffset", BIG * (1 - solved / TOTAL));
+  $("#ring-wrap").setAttribute("aria-label", `${solved} of ${TOTAL} solved, ${pct} percent`);
+
+  DATA.forEach((sec, si) => {
+    const n = sec.items.length, k = secSolved(si), f = k / n;
+    const el = $("#sec-" + si);
+    el.classList.toggle("complete", k === n);
+    $(".sec-ring .val", el).setAttribute("stroke-dashoffset", RC * (1 - f));
+    $(".sec-count b", el).textContent = k;
+    $(".sec-bar i", el).style.width = (f * 100) + "%";
+    const tile = $(`.tile[data-si="${si}"]`);
+    tile.classList.toggle("complete", k === n);
+    $(".bar i", tile).style.width = (f * 100) + "%";
+    $(".tile-c", tile).textContent = k === n ? "Complete" : `${k} / ${n}`;
+  });
+
+  $$(".cell").forEach(cell => {
+    const s = statusOf(+cell.dataset.id);
+    if (cell.dataset.s !== s) {
+      cell.dataset.s = s;
+      if (!reduce) { cell.classList.remove("ping"); void cell.offsetWidth; cell.classList.add("ping"); }
+    }
+  });
+
+  $$("#seg [data-c]").forEach(el => { el.textContent = el.dataset.c === "all" ? TOTAL : c[el.dataset.c]; });
+  renderHeat();
+  renderNext();
+}
+
+/* ---------- Heatmap & streak ---------- */
+function renderHeat() {
+  const per = {};
+  Object.keys(state.items).forEach(k => {
+    const r = state.items[k];
+    if (r && r.d && isSolved(r.s)) per[r.d] = (per[r.d] || 0) + 1;
+  });
+  const weeks = 17, end = new Date(); end.setHours(0, 0, 0, 0);
+  const start = new Date(end); start.setDate(end.getDate() - end.getDay() - (weeks - 1) * 7);
+  const tk = dstr(end);
+  let html = "";
+  for (let w = 0; w < weeks; w++) {
+    html += '<div class="hw">';
+    for (let d = 0; d < 7; d++) {
+      const dt = new Date(start.getFullYear(), start.getMonth(), start.getDate() + w * 7 + d);
+      if (dt > end) { html += '<i class="future"></i>'; continue; }
+      const k = dstr(dt), n = per[k] || 0;
+      const lvl = n === 0 ? 0 : n === 1 ? 1 : n <= 3 ? 2 : n <= 5 ? 3 : 4;
+      const lbl = `${n} solved · ${dt.toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" })}`;
+      html += `<i class="l${lvl}${k === tk ? " today" : ""}" title="${lbl}"></i>`;
+    }
+    html += "</div>";
+  }
+  $("#heat").innerHTML = html;
+
+  let streak = 0;
+  const d = new Date(end);
+  if (!per[dstr(d)]) d.setDate(d.getDate() - 1);
+  while (per[dstr(d)]) { streak++; d.setDate(d.getDate() - 1); }
+  let week = 0;
+  for (let i = 0; i < 7; i++) { const x = new Date(end.getFullYear(), end.getMonth(), end.getDate() - i); week += per[dstr(x)] || 0; }
+  tween($("#streak"), streak); tween($("#week"), week); tween($("#today-n"), per[tk] || 0);
+}
+
+/* ---------- Up next ---------- */
+let skip = 0;
+function renderNext(force) {
+  const box = $("#next-body");
+  const pending = ITEMS.filter(it => !isSolved(statusOf(it.id)));
+  $$(".cell.next-up").forEach(c => c.classList.remove("next-up"));
+  if (!pending.length) {
+    box.dataset.id = "";
+    $("#next-idx").textContent = "";
+    box.innerHTML = `<div class="next-done"><h3>All ${TOTAL} questions solved</h3><p>Anything you marked Revise is waiting under the Revise filter.</p></div>`;
+    return;
+  }
+  skip = ((skip % pending.length) + pending.length) % pending.length;
+  const it = pending[skip], s = statusOf(it.id), sec = DATA[it.si];
+  $(`.cell[data-id="${it.id}"]`).classList.add("next-up");
+  if (!force && box.dataset.id === String(it.id) && box.dataset.s === s) return;
+  const changed = box.dataset.id !== String(it.id);
+  box.dataset.id = it.id; box.dataset.s = s;
+  $("#next-idx").textContent = pad(it.id);
+  box.innerHTML = `
+    <p class="next-sec"><b>${esc(sec.t)}</b>${it.grp ? " · " + esc(it.grp) : ""}</p>
+    <h3 class="next-q">${esc(title(it))}</h3>
+    <p class="next-pos mono">Question ${pad(it.id)} of ${TOTAL} · ${LABEL[s]}${skip ? ` · skipped ${skip}` : ""}</p>
+    <div class="links">${linksHTML(it) || '<span class="next-pos">No link in the sheet for this one.</span>'}</div>
+    <div class="next-actions">
+      <button class="btn primary" type="button" data-act="solve">Mark solved</button>
+      ${s === "doing" ? "" : '<button class="btn" type="button" data-act="start">Start</button>'}
+      <button class="btn" type="button" data-act="skip">Skip for now</button>
+      <button class="btn" type="button" data-act="goto">Show in list</button>
+    </div>`;
+  if (changed && !reduce) { box.classList.remove("enter"); void box.offsetWidth; box.classList.add("enter"); }
+}
+$("#next-body").addEventListener("click", e => {
+  const b = e.target.closest("[data-act]"); if (!b) return;
+  const id = +$("#next-body").dataset.id; if (!id) return;
+  const act = b.dataset.act;
+  if (act === "solve") setStatus(id, "done", b);
+  else if (act === "start") setStatus(id, "doing", b);
+  else if (act === "skip") { skip++; renderNext(true); }
+  else if (act === "goto") reveal(id);
+});
+
+/* ---------- Status changes ---------- */
+function updateRow(id) {
+  const row = $("#q-" + id); if (!row) return;
+  const s = statusOf(id), rec = state.items[id] || {};
+  row.dataset.s = s;
+  $(".check", row).setAttribute("aria-pressed", isSolved(s));
+  $(".status", row).value = s;
+  $(".when", row).textContent = rec.d && isSolved(s) ? "Solved " + fmtDate(rec.d) : "";
+}
+let lastUndo = null;
+function setStatus(id, s, origin, quiet) {
+  const prev = statusOf(id); if (prev === s) return;
+  const it = BYID.get(id), before = secSolved(it.si);
+  const prevRec = state.items[id] ? { ...state.items[id] } : null;
+  const rec = state.items[id] || {};
+  rec.s = s;
+  if (isSolved(s)) { if (!rec.d) rec.d = todayStr(); } else delete rec.d;
+  if (s === "todo" && !rec.n) delete state.items[id]; else state.items[id] = rec;
+  save(); updateRow(id); refresh();
+  if (filter !== "all") setTimeout(applyFilter, 650);
+  if (quiet) return;
+  lastUndo = () => { if (prevRec) state.items[id] = prevRec; else delete state.items[id]; save(); updateRow(id); refresh(); applyFilter(); };
+  const row = $("#q-" + id);
+  if (isSolved(s) && !isSolved(prev)) {
+    row.classList.remove("pop"); void row.offsetWidth; row.classList.add("pop");
+    burst(origin || $(".check", row), 18);
+    const n = DATA[it.si].items.length, after = secSolved(it.si);
+    if (after === n && before < n) { celebrate(); toast(`${DATA[it.si].t} complete. Every question in it is solved.`, true); }
+    else toast(`Solved. ${counts().done + counts().revise} of ${TOTAL} done.`, true);
+  } else if (s === "doing") toast(`Started “${title(it)}”`, true);
+  else if (s === "revise") toast(`Marked “${title(it)}” to revise`, true);
+  else if (s === "todo") toast(`Moved “${title(it)}” back to To do`, true);
+}
+
+listEl.addEventListener("click", e => {
+  const head = e.target.closest(".sec-head");
+  if (head) {
+    if (listEl.classList.contains("filtering")) return;
+    const sec = head.parentElement, si = +sec.id.slice(4);
+    const col = !sec.classList.contains("collapsed");
+    sec.classList.toggle("collapsed", col);
+    head.setAttribute("aria-expanded", !col);
+    $(".sec-body", sec).inert = col;
+    if (col) state.collapsed[si] = true; else delete state.collapsed[si];
+    save(); syncFold(); return;
+  }
+  const row = e.target.closest(".row"); if (!row) return;
+  const id = +row.dataset.id;
+  if (e.target.closest(".check")) {
+    setStatus(id, isSolved(statusOf(id)) ? "todo" : "done", e.target.closest(".check"));
+  } else if (e.target.closest(".note-btn")) {
+    const btn = e.target.closest(".note-btn"), note = $(".note", row);
+    note.hidden = !note.hidden;
+    btn.setAttribute("aria-expanded", !note.hidden);
+    if (!note.hidden) $("textarea", note).focus();
+  }
+});
+listEl.addEventListener("change", e => {
+  if (!e.target.classList.contains("status")) return;
+  setStatus(+e.target.closest(".row").dataset.id, e.target.value, e.target);
+});
+let noteTimer;
+listEl.addEventListener("input", e => {
+  if (e.target.tagName !== "TEXTAREA") return;
+  const row = e.target.closest(".row"), id = +row.dataset.id, v = e.target.value;
+  clearTimeout(noteTimer);
+  noteTimer = setTimeout(() => {
+    const rec = state.items[id] || { s: "todo" };
+    if (v.trim()) rec.n = v; else delete rec.n;
+    if (rec.s === "todo" && !rec.n) delete state.items[id]; else state.items[id] = rec;
+    $(".note-btn", row).classList.toggle("has", !!v.trim());
+    save();
+  }, 300);
+});
+
+/* ---------- Navigation ---------- */
+function openSection(si) {
+  const sec = $("#sec-" + si);
+  if (sec.classList.contains("collapsed")) {
+    sec.classList.remove("collapsed");
+    $(".sec-head", sec).setAttribute("aria-expanded", "true");
+    $(".sec-body", sec).inert = false;
+    delete state.collapsed[si]; save(); syncFold();
+  }
+  return sec;
+}
+function reveal(id) {
+  const it = BYID.get(id);
+  const row = $("#q-" + id);
+  if (row.hidden) { setFilter("all"); $("#q").value = ""; applyFilter(); }
+  openSection(it.si);
+  setTimeout(() => {
+    row.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
+    row.classList.remove("flash"); void row.offsetWidth; row.classList.add("flash");
+  }, 60);
+}
+$("#strip").addEventListener("click", e => { const c = e.target.closest(".cell"); if (c) reveal(+c.dataset.id); });
+$("#tiles").addEventListener("click", e => {
+  const t = e.target.closest(".tile"); if (!t) return;
+  const sec = openSection(+t.dataset.si);
+  sec.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+});
+
+/* ---------- Filter & search ---------- */
+const qInput = $("#q");
+function setFilter(f) {
+  filter = f;
+  $$("#seg button").forEach(b => b.setAttribute("aria-pressed", b.dataset.f === f));
+}
+function applyFilter() {
+  const q = qInput.value.trim().toLowerCase();
+  const active = !!q || filter !== "all";
+  listEl.classList.toggle("filtering", active);
+  let shown = 0;
+  DATA.forEach((sec, si) => {
+    const secEl = $("#sec-" + si), secHit = !!q && sec.t.toLowerCase().includes(q);
+    let n = 0;
+    sec.items.forEach(it => {
+      const vis = (filter === "all" || statusOf(it.id) === filter) && (!q || secHit || it.hay.includes(q));
+      $("#q-" + it.id).hidden = !vis;
+      if (vis) n++;
+    });
+    secEl.hidden = n === 0;
+    $(".sec-body", secEl).inert = !active && secEl.classList.contains("collapsed");
+    shown += n;
+  });
+  $("#empty").hidden = shown > 0;
+}
+$("#seg").addEventListener("click", e => { const b = e.target.closest("button"); if (b) { setFilter(b.dataset.f); applyFilter(); } });
+qInput.addEventListener("input", applyFilter);
+document.addEventListener("keydown", e => {
+  if (e.key === "/" && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) { e.preventDefault(); qInput.focus(); }
+  if (e.key === "Escape" && document.activeElement === qInput) { qInput.value = ""; applyFilter(); qInput.blur(); }
+});
+
+/* ---------- Collapse all ---------- */
+const foldBtn = $("#fold");
+function syncFold() {
+  const all = DATA.every((_, si) => state.collapsed[si]);
+  foldBtn.textContent = all ? "Expand all" : "Collapse all";
+}
+foldBtn.addEventListener("click", () => {
+  const collapse = foldBtn.textContent === "Collapse all";
+  DATA.forEach((_, si) => {
+    const sec = $("#sec-" + si);
+    sec.classList.toggle("collapsed", collapse);
+    $(".sec-head", sec).setAttribute("aria-expanded", !collapse);
+    if (collapse) state.collapsed[si] = true; else delete state.collapsed[si];
+  });
+  save(); syncFold(); applyFilter();
+});
+
+/* ---------- Theme ---------- */
+$("#theme").addEventListener("click", () => {
+  const cur = document.documentElement.dataset.theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  const next = cur === "dark" ? "light" : "dark";
+  document.documentElement.dataset.theme = next;
+  state.theme = next; save();
+});
+
+/* ---------- Backup ---------- */
+$("#export").addEventListener("click", () => {
+  const blob = new Blob([JSON.stringify({ app: "dsa-pattern-tracker", version: 1, exported: new Date().toISOString(), items: state.items }, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = `dsa-progress-${todayStr()}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1500);
+  $("#menu").open = false; toast("Progress exported");
+});
+$("#import").addEventListener("click", () => $("#import-file").click());
+$("#import-file").addEventListener("change", e => {
+  const file = e.target.files[0]; if (!file) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const p = JSON.parse(r.result);
+      if (!p || typeof p.items !== "object") throw new Error();
+      const clean = {};
+      Object.entries(p.items).forEach(([k, v]) => {
+        if (BYID.has(+k) && v && STATUSES.includes(v.s)) {
+          clean[k] = { s: v.s };
+          if (typeof v.d === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v.d)) clean[k].d = v.d;
+          if (typeof v.n === "string" && v.n) clean[k].n = v.n;
+        }
+      });
+      state.items = clean; save();
+      ITEMS.forEach(it => {
+        updateRow(it.id);
+        const rec = clean[it.id] || {};
+        const row = $("#q-" + it.id);
+        $("textarea", row).value = rec.n || "";
+        $(".note-btn", row).classList.toggle("has", !!rec.n);
+      });
+      refresh(); applyFilter();
+      toast(`Imported progress for ${Object.keys(clean).length} questions`);
+    } catch (err) { toast("That file isn't a progress export from this tracker. Choose a .json file made with Export."); }
+    e.target.value = "";
+  };
+  r.readAsText(file);
+  $("#menu").open = false;
+});
+let resetArmed = null;
+$("#reset").addEventListener("click", () => {
+  const btn = $("#reset");
+  if (!resetArmed) {
+    btn.textContent = "Click again to erase everything";
+    resetArmed = setTimeout(() => { btn.textContent = "Reset all progress"; resetArmed = null; }, 4000);
+    return;
+  }
+  clearTimeout(resetArmed); resetArmed = null; btn.textContent = "Reset all progress";
+  state.items = {}; save();
+  ITEMS.forEach(it => {
+    updateRow(it.id);
+    const row = $("#q-" + it.id);
+    $("textarea", row).value = ""; $(".note-btn", row).classList.remove("has");
+  });
+  skip = 0; refresh(); applyFilter();
+  $("#menu").open = false; toast("All progress cleared");
+});
+document.addEventListener("click", e => { const m = $("#menu"); if (m.open && !m.contains(e.target)) m.open = false; });
+
+/* ---------- Toast ---------- */
+const toastEl = $("#toast"); let toastT;
+function toast(msg, undo) {
+  toastEl.innerHTML = `<span>${esc(msg)}</span>${undo ? '<button type="button">Undo</button>' : ""}`;
+  toastEl.classList.add("show");
+  clearTimeout(toastT);
+  toastT = setTimeout(() => toastEl.classList.remove("show"), 3200);
+}
+toastEl.addEventListener("click", e => {
+  if (e.target.tagName === "BUTTON" && lastUndo) { lastUndo(); lastUndo = null; toastEl.classList.remove("show"); }
+});
+
+/* ---------- Particles ---------- */
+const cv = $("#fx"), cx = cv.getContext("2d");
+let parts = [], raf = 0;
+function sizeCanvas() {
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  cv.width = innerWidth * dpr; cv.height = innerHeight * dpr;
+  cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+sizeCanvas(); addEventListener("resize", sizeCanvas);
+const palette = () => { const cs = getComputedStyle(document.documentElement); return ["--accent", "--doing", "--revise", "--accent-2"].map(v => cs.getPropertyValue(v).trim()); };
+function burst(el, n) {
+  if (reduce || !el) return;
+  const r = el.getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height / 2, cols = palette();
+  for (let i = 0; i < n; i++) {
+    const a = Math.random() * Math.PI * 2, sp = 1.8 + Math.random() * 3.6;
+    parts.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 1.6, g: .13, life: 1, decay: .022 + Math.random() * .02, s: 3 + Math.random() * 3, c: cols[i % cols.length], rot: Math.random() * 6, vr: (Math.random() - .5) * .35, shape: i % 3 });
+  }
+  loop();
+}
+function celebrate() {
+  if (reduce) return;
+  const cols = palette();
+  for (let i = 0; i < 170; i++) {
+    parts.push({ x: Math.random() * innerWidth, y: -20 - Math.random() * innerHeight * .4, vx: (Math.random() - .5) * 2.4, vy: 1.5 + Math.random() * 3, g: .045, life: 1, decay: .0035 + Math.random() * .004, s: 5 + Math.random() * 5, c: cols[i % cols.length], rot: Math.random() * 6, vr: (Math.random() - .5) * .22, shape: i % 3 });
+  }
+  loop();
+}
+function loop() {
+  if (raf) return;
+  const tick = () => {
+    cx.clearRect(0, 0, innerWidth, innerHeight);
+    parts = parts.filter(p => p.life > 0 && p.y < innerHeight + 40);
+    for (const p of parts) {
+      p.vy += p.g; p.x += p.vx; p.y += p.vy; p.vx *= .99; p.rot += p.vr; p.life -= p.decay;
+      cx.save(); cx.globalAlpha = Math.max(0, Math.min(1, p.life * 1.4));
+      cx.translate(p.x, p.y); cx.rotate(p.rot); cx.fillStyle = p.c;
+      if (p.shape === 0) cx.fillRect(-p.s / 2, -p.s / 4, p.s, p.s / 2);
+      else if (p.shape === 1) { cx.beginPath(); cx.arc(0, 0, p.s / 2, 0, Math.PI * 2); cx.fill(); }
+      else cx.fillRect(-p.s / 2, -p.s / 2, p.s * .8, p.s * .8);
+      cx.restore();
+    }
+    if (parts.length) raf = requestAnimationFrame(tick);
+    else { raf = 0; cx.clearRect(0, 0, innerWidth, innerHeight); }
+  };
+  raf = requestAnimationFrame(tick);
+}
+
+/* ---------- Boot ---------- */
+DATA.forEach((_, si) => { if (state.collapsed[si]) $("#sec-" + si + " .sec-body").inert = true; });
+syncFold();
+applyFilter();
+requestAnimationFrame(() => requestAnimationFrame(refresh));
+})();
+</script>
+</body>
+</html>
